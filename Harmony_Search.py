@@ -28,8 +28,6 @@ class Harmony_Search():
     def bool_probability(self, probability):
         return (np.random.random() < probability)
 
-    def random_pitch(self, pit_range):
-        return np.random.uniform(pit_range[0], pit_range[1])
 
     def random_harmony_vector(self):
         for i in range(self.ins_num):
@@ -47,24 +45,23 @@ class Harmony_Search():
         if self.bool_probability(self.hmcr):
             new_pit = self.random_pit_from_list(self.HM[:,ins_ind])
             if self.bool_probability(self.par):
-                new_pit = new_pit + self.fw * np.random.uniform(-1.0, 1.0)
+                new_pit = new_pit + self.fw[ins_ind] * np.random.uniform(-1.0, 1.0)
         else:
-            new_pit = self.random_pitch(self.pit_range[ins_ind])
+            new_pit = np.random.uniform(self.pit_range[ins_ind,0], self.pit_range[ins_ind,1])
         return new_pit
 
     def new_harmony_vector(self):
+        new_vector = np.zeros(self.ins_num)
         for i in range(self.ins_num):
-            if i==0:
-                new_vector = np.array(self.select_pitch(i))
-            else:
-                new_vector = np.append(new_vector, self.select_pitch(i))
+            new_vector[i] = self.select_pitch(i)
         return new_vector
 
     def generate_HM(self):
         self.HM = np.zeros((self.hms, self.ins_num))
         self.HM_f = np.zeros(self.hms)
         for i in range(self.hms):
-            self.HM[i] = self.random_harmony_vector()
+            for j in range(self.ins_num):
+                self.HM[i, j] = np.random.uniform(self.pit_range[j,0], self.pit_range[j,1])
             self.HM_f[i] = self.obj_fun(self.HM[i])
         return 0
 
