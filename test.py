@@ -16,7 +16,7 @@ max_iter = 500000
 
 def obj_fun(vector):
     x, y, z = vector
-    f = (x-3.0)**2 + (y-6.0)**2 + (z-88.0)**2
+    f = (x-3.0)**2 + (y-6.0)**2 - np.sin(z) + np.log10(abs(x - y))
     return f
 
 HS = Harmony_Search(ins_num, pit_range, hms, obj_fun, tol, max_iter)
