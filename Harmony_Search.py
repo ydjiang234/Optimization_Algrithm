@@ -12,7 +12,8 @@ class Harmony_Search():
     #tol: Tolerance
     #max_iter: Maximum Iteration Number - an int
 
-    def __init__(self, pit_range, hms, fw, obj_fun, tol, max_iter, hmcr=0.9, par=0.3):
+    def __init__(self, ins_num, pit_range, hms, fw, obj_fun, tol, max_iter, hmcr=0.9, par=0.3):
+        self.ins_num = ins_num
         self.pit_range = pit_range
         self.hms = hms
         self.fw = fw
@@ -31,29 +32,39 @@ class Harmony_Search():
         return np.random.uniform(pit_range[0], pit_range[1])
 
     def random_harmony_vector(self):
-        return np.array([self.random_pitch(self.pit_range)])
+        for i in range(self.ins_num):
+            if i==0:
+                new_vector = np.array(self.random_pitch(self.pit_range[i]))
+            else:
+                new_vector = np.append(new_vector, self.random_pitch(self.pit_range[i]))
+        return new_vector
 
     def random_pit_from_list(self, target_list):
         ind = int(len(target_list) * np.random.random());
         return target_list[ind]
 
-    def new_harmony_vector(self):
+    def select_pitch(self, ins_ind):
         if self.bool_probability(self.hmcr):
-            new_pit = np.array([self.random_pit_from_list(self.HM[:,0])])
+            new_pit = self.random_pit_from_list(self.HM[:,ins_ind])
             if self.bool_probability(self.par):
                 new_pit = new_pit + self.fw * np.random.uniform(-1.0, 1.0)
         else:
-            new_pit = self.random_pitch(self.pit_range)
+            new_pit = self.random_pitch(self.pit_range[ins_ind])
+        return new_pit
 
-        return np.array([new_pit])
+    def new_harmony_vector(self):
+        for i in range(self.ins_num):
+            if i==0:
+                new_vector = np.array(self.select_pitch(i))
+            else:
+                new_vector = np.append(new_vector, self.select_pitch(i))
+        return new_vector
 
     def generate_HM(self):
+        self.HM = np.zeros((self.hms, self.ins_num))
         self.HM_f = np.zeros(self.hms)
         for i in range(self.hms):
-            if i == 0:
-                self.HM = self.random_harmony_vector()
-            else:
-                self.HM = np.vstack((self.HM, self.random_harmony_vector()))
+            self.HM[i] = self.random_harmony_vector()
             self.HM_f[i] = self.obj_fun(self.HM[i])
         return 0
 
