@@ -40,8 +40,14 @@ class chromosome():
 class Genetic_Algorithm():
 
     def __init__(self, var_num, var_range, var_digit, population, obj_fun, mutation_prop=0.1):
+        self.var_num = var_num
+        self.var_range = var_range
+        self.var_digit = var_digit
+        self.population = population
+        self.obj_fun = obj_fun
+        self.mutation_prop = mutation_prop
 
-class covertor():
+class convertor():
 
     def __init__(self, dec, dec_range, dec_digit):
         self.dec = dec;
