@@ -17,6 +17,27 @@ class chromosome():
         self.bin_range = np.array([bottom_limit.zfill(self.bin_digit), up_limit.zfill(self.bin_digit)])
         self.update_bin()
 
+    def bool_probability(self, probability):
+        return (np.random.random() < probability)
+
+    def change_str_letter(self, string, ind, target):
+        temp = list(string)
+        temp[ind] = target
+        return ''.join(temp)
+
+    def mutate_single(self, ind):
+        string = self.bin[ind]
+        if string=='0':
+            self.bin = self.change_str_letter(self.bin, ind, '1')
+        elif string=='1':
+            self.bin = self.change_str_letter(self.bin, ind, '0')
+
+    def mutate(self, prob, num=1):
+        if self.bool_probability(prob):
+            ind_mut = np.random.randint(self.bin_digit, size=num)
+            for ind in ind_mut:
+                self.mutate_single(ind)
+
     def dec2bin(self, dec):
         out = '{0:b}'.format(int((dec - self.dec_range[0]) * self.dec_digit))
         return out.zfill(self.bin_digit)
