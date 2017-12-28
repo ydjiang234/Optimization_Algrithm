@@ -47,43 +47,23 @@ class Genetic_Algorithm():
         self.obj_fun = obj_fun
         self.mutation_prop = mutation_prop
 
-class convertor():
+class coder():
 
-    def __init__(self, dec, dec_range, dec_digit):
-        self.dec = dec;
-        self.dec_range = dec_range
-        self.dec_digit = dec_digit
+    def __init__(self, var_num, var_range, var_digit):
+        self.var_num = var_num
+        self.var_range = var_range
+        self.var_digit = var_digit
         self.update()
 
     def update(self):
-        self.shift_range = (self.dec_range - self.dec_range[0]) * self.dec_digit
-        self.shift_range = self.shift_range.astype(int)
-        up_limit = '{0:b}'.format(self.shift_range[1])
-        bottom_limit = '{0:b}'.format(self.shift_range[0])
-        self.bin_digit = len(up_limit)
-        self.bin_range = np.array([bottom_limit.zfill(self.bin_digit), up_limit.zfill(self.bin_digit)])
-        self.update_bin()
-
-    def bool_probability(self, probability):
-        return (np.random.random() < probability)
-
-    def change_str_letter(self, string, ind, target):
-        temp = list(string)
-        temp[ind] = target
-        return ''.join(temp)
-
-    def mutate_single(self, ind):
-        string = self.bin[ind]
-        if string=='0':
-            self.bin = self.change_str_letter(self.bin, ind, '1')
-        elif string=='1':
-            self.bin = self.change_str_letter(self.bin, ind, '0')
-
-    def mutate(self, prob, num=1):
-        if self.bool_probability(prob):
-            ind_mut = np.random.randint(self.bin_digit, size=num)
-            for ind in ind_mut:
-                self.mutate_single(ind)
+        self.int_range = np.zeros((self.var_num, 2))
+        self.bin_limit = np.zeros(self.var_num)
+        self.bin_len = np.zeros(self.var_num)
+        for i in range(self.var_num):
+           self.int_range[i] = (self.var_range[i] - self.var_range[i,0]) * self.digit[i]
+           self.int_range[i] = self.int_range.astype(int)
+           self.bin_limit[i] = '{0:b}'.format(self.int_range[i,1])
+           self.bin_len[i] = len(self.bin_limit[i])
 
     def dec2bin(self, dec):
         out = '{0:b}'.format(int((dec - self.dec_range[0]) * self.dec_digit))
