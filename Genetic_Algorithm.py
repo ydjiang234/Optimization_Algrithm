@@ -15,7 +15,9 @@ class chromosome():
         #return int(bin_str, 2) > int(self.bin_limit, 2)
 
     def random_int_list(self, lower, upper, num):
-        return random.sample(range(lower, upper), num)
+        out = random.sample(range(lower, upper), num)
+        out.sort()
+        return out
 
     def change_str_letter(self, string, ind, target):
         temp = list(string)
@@ -43,15 +45,17 @@ class chromosome():
             if i==0:
                 out.append(self.bin_str[:break_points[i]])
             elif i == len(break_points):
-                out.append(self.bin_str[break_points[i]:])
+                out.append(self.bin_str[break_points[i-1]:])
             else:
                 out.append(self.bin_str[break_points[i-1]: break_points[i]])
         return np.array(out)
 
     def crossover(self, chrom1, chrom2, break_num):
-        break_points = self.random_int_list(1, chrom1.bin_len+1, break_num)
+        break_points = self.random_int_list(1, chrom1.bin_len, break_num)
         parts1 = chrom1.division(break_points)
         parts2 = chrom2.division(break_points)
+        print(parts1)
+        print(parts2)
         new_str1 = list([]) 
         new_str2 = list([]) 
         for i in range(len(parts1)):
@@ -77,9 +81,41 @@ class Genetic_Algorithm():
         self.population = population
         self.obj_fun = obj_fun
         self.mutation_prop = mutation_prop
+        self.group = list([])
+        self.fitness = np.array([])
+        self.update()
 
     def update(self):
-        cd = coder(self.var_num, self.var_range, self.var_digit)
+        self.cd = coder(self.var_num, self.var_range, self.var_digit)
+        self.ini_group()
+
+    def bool_probability(self, probability):
+        return (np.random.random() < probability)
+
+    def gen_rand_chrom(self):
+        vector = np.zeros(self.var_num)
+        for var_ind in range(self.var_num):
+            vector[var_ind] = np.random.uniform(self.var_range[var_ind,0], self.var_range[var_ind,1])
+        return chromosome(self.cd.encode(vector))
+
+    def ini_group(self):
+        for i in range(self.population):
+            self.add(self.gen_rand_chrom())
+
+    def update_sel_prop(self):
+        sort_ind = self.fitness.argsort() + 1.0
+        self.sel_prop = sort_ind / np.sum(sort_ind)
+
+    def add(self, chrom):
+        self.group.append(chrom)
+        temp = self.cd.decode(chrom.bin_str)
+        self.fitness = np.append(self.fitness, self.obj_fun(temp))
+        self.update_sel_prop()
+
+    def delete(self, ind):
+        del self.group[ind]
+        self.fitness = np.delete(self.fitness, ind)
+        self.update_sel_prop()
 
 class coder():
 
