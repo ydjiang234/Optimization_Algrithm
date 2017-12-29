@@ -1,12 +1,13 @@
 import numpy as np
-from Genetic_Algorithm import chromosome, Genetic_Algorithm
+from Genetic_Algorithm import chromosome, Genetic_Algorithm, coder
 
-var_num = 2
+var_num = 3
 var_range = np.array([
     [0.0, 100.0],
     [0.0, 100.0],
+    [0.0, 100.0],
     ])
-var_digit = [1000, 1000]
+var_digit = [1000, 1000, 10]
 population = 10
 mutation_prop = 0.1
 
@@ -22,3 +23,7 @@ def obj_fun(vector):
     return f
 
 GA = Genetic_Algorithm(var_num, var_range, var_digit, population, obj_fun)
+
+a = coder(var_num, var_range, var_digit)
+b = a.encode(np.array([10.0, 20.0, 98.0]))
+print(a.decode(b))

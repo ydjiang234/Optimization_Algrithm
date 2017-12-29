@@ -56,22 +56,36 @@ class coder():
         self.update()
 
     def update(self):
-        self.int_range = np.zeros((self.var_num, 2))
-        self.bin_limit = np.zeros(self.var_num)
-        self.bin_len = np.zeros(self.var_num)
+        self.int_range = np.zeros((self.var_num, 2), dtype=int)
+        self.bin_limit = list([])
+        self.bin_len = np.zeros(self.var_num, dtype=int)
         for i in range(self.var_num):
-           self.int_range[i] = (self.var_range[i] - self.var_range[i,0]) * self.digit[i]
-           self.int_range[i] = self.int_range.astype(int)
-           self.bin_limit[i] = '{0:b}'.format(self.int_range[i,1])
+           temp = (self.var_range[i] - self.var_range[i,0]) * self.var_digit[i]
+           self.int_range[i] = temp.astype(int)
+           self.bin_limit.append('{0:b}'.format(self.int_range[i,1]))
            self.bin_len[i] = len(self.bin_limit[i])
+        self.bin_limit = np.array(self.bin_limit)
 
-    def dec2bin(self, dec):
-        out = '{0:b}'.format(int((dec - self.dec_range[0]) * self.dec_digit))
-        return out.zfill(self.bin_digit)
+    def dec2bin(self, var, var_ind):
+        out = '{0:b}'.format(int((var - self.var_range[var_ind,0]) * self.var_digit[var_ind]))
+        return out.zfill(self.bin_len[var_ind])
 
-    def bin2dec(self, bin):
-        out = int(bin, 2)
-        return out/self.dec_digit + self.dec_range[0]
+    def bin2dec(self, var_bin, var_ind):
+        out = int(var_bin, 2)
+        return out/self.var_digit[var_ind] + self.var_range[var_ind,0]
+    
+    def encode(self, vector):
+        out = ''
+        for var_ind in range(self.var_num):
+            out += self.dec2bin(vector[var_ind], var_ind)
+        return out
 
-    def update_bin(self):
-        self.bin = self.dec2bin(self.dec)
+    def decode(self, bin_str):
+        out = np.zeros(self.var_num)
+        for var_ind in range(self.var_num):
+            temp1 = np.sum(self.bin_len[:var_ind])
+            temp2 = np.sum(self.bin_len[:var_ind+1])
+            temp_bin = bin_str[temp1:temp2]
+            out[var_ind] = self.bin2dec(temp_bin, var_ind)
+        return out
+
