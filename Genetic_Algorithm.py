@@ -3,16 +3,16 @@ import random
 
 class chromosome():
 
-    def __init__(self, bin_str, bin_limit):
+    def __init__(self, bin_str):
         self.bin_str = bin_str
-        self.bin_limit = bin_limit
+        #self.bin_limit = bin_limit
         self.bin_len = len(bin_str)
 
     def bool_probability(self, probability):
         return (np.random.random() < probability)
 
-    def bool_outrange(self, bin_str):
-        return int(bin_str, 2) > int(self.bin_limit, 2)
+    #def bool_outrange(self, bin_str):
+        #return int(bin_str, 2) > int(self.bin_limit, 2)
 
     def random_int_list(self, lower, upper, num):
         return random.sample(range(lower, upper), num)
@@ -37,6 +37,37 @@ class chromosome():
             for ind in ind_mut:
                 self.mutate_single(ind)
 
+    def division(self, break_points):
+        out = list([])
+        for i in range(len(break_points)+1):
+            if i==0:
+                out.append(self.bin_str[:break_points[i]])
+            elif i == len(break_points):
+                out.append(self.bin_str[break_points[i]:])
+            else:
+                out.append(self.bin_str[break_points[i-1]: break_points[i]])
+        return np.array(out)
+
+    def crossover(self, chrom1, chrom2, break_num):
+        break_points = self.random_int_list(1, chrom1.bin_len+1, break_num)
+        parts1 = chrom1.division(break_points)
+        parts2 = chrom2.division(break_points)
+        new_str1 = list([]) 
+        new_str2 = list([]) 
+        for i in range(len(parts1)):
+            if i%2 == 0:
+                new_str1.append(parts1[i])
+                new_str2.append(parts2[i])
+            else:
+                new_str1.append(parts2[i])
+                new_str2.append(parts1[i])
+        new_str1 = ''.join(new_str1)
+        new_str2 = ''.join(new_str2)
+        return chromosome(new_str1), chromosome(new_str2)
+
+
+
+
 class Genetic_Algorithm():
 
     def __init__(self, var_num, var_range, var_digit, population, obj_fun, mutation_prop=0.1):
@@ -46,6 +77,9 @@ class Genetic_Algorithm():
         self.population = population
         self.obj_fun = obj_fun
         self.mutation_prop = mutation_prop
+
+    def update(self):
+        cd = coder(self.var_num, self.var_range, self.var_digit)
 
 class coder():
 
