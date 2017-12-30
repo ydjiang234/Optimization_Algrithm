@@ -30,8 +30,8 @@ class chromosome():
             out = self.change_str_letter(self.bin_str, ind, '1')
         elif string=='1':
             out = self.change_str_letter(self.bin_str, ind, '0')
-        if not self.bool_outrange(out):
-            self.bin_str = out
+        #if not self.bool_outrange(out):
+            #self.bin_str = out
 
     def mutate(self, prob, num=1):
         if self.bool_probability(prob):
@@ -54,8 +54,6 @@ class chromosome():
         break_points = self.random_int_list(1, chrom1.bin_len, break_num)
         parts1 = chrom1.division(break_points)
         parts2 = chrom2.division(break_points)
-        print(parts1)
-        print(parts2)
         new_str1 = list([]) 
         new_str2 = list([]) 
         for i in range(len(parts1)):
@@ -74,13 +72,15 @@ class chromosome():
 
 class Genetic_Algorithm():
 
-    def __init__(self, var_num, var_range, var_digit, population, obj_fun, mutation_prop=0.1):
+    def __init__(self, var_num, var_range, var_digit, population, obj_fun, sel_por=0.4, mutation_prop=0.1, cross_num=1):
         self.var_num = var_num
         self.var_range = var_range
         self.var_digit = var_digit
         self.population = population
         self.obj_fun = obj_fun
+        self.sel_por = sel_por
         self.mutation_prop = mutation_prop
+        self.cross_num = cross_num
         self.group = list([])
         self.fitness = np.array([])
         self.update()
@@ -116,6 +116,56 @@ class Genetic_Algorithm():
         del self.group[ind]
         self.fitness = np.delete(self.fitness, ind)
         self.update_sel_prop()
+
+    def select(self):
+        sel_num = int(self.population * self.sel_por * 2)
+        sel_ind = list([])
+        cur_ind = 0
+        while (len(sel_ind) < sel_num):
+            if cur_ind not in sel_ind:
+                if self.bool_probability(self.sel_prop[cur_ind]):
+                    sel_ind.append(cur_ind)
+
+            cur_ind += 1
+            if cur_ind == self.population:
+                cur_ind = 0
+        return np.array(sel_ind)
+
+    def eliminate(self):
+        cur_ind = 0
+        del_ind = list([])
+        del_num = len(self.group) - self.population
+        while (len(del_ind) < del_num):
+            if cur_ind not in del_ind:
+                if self.bool_probability(1.0 - self.sel_prop[cur_ind]):
+                    del_ind.append(cur_ind)
+
+            cur_ind += 1
+            if cur_ind == len(self.group):
+                cur_ind = 0
+
+        for i in del_ind:
+            self.delete(i)
+        
+
+
+    def cross(self, cross_ind):
+        fa_ind, ma_ind = np.split(cross_ind, 2)
+        for i in range(len(fa_ind)):
+            fa = self.group[fa_ind[i]]
+            ma = self.group[ma_ind[i]]
+            chrom1, chrom2 = fa.crossover(fa, ma, self.cross_num)
+            chrom1.mutate(self.mutation_prop)
+            chrom2.mutate(self.mutation_prop)
+            self.add(chrom1)
+            self.add(chrom2)
+        
+    def evolve(self):
+        cross_ind = self.select()
+        self.cross(cross_ind)
+        self.eliminate()
+
+
 
 class coder():
 
