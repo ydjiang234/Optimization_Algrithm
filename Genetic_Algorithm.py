@@ -2,6 +2,100 @@ import numpy as np
 import copy
 import random
 
+class Genetic_Algorithm():
+
+    def __init__(self, var_range, var_digit, population, obj_fun, sel_por=0.4, cross_num=1, mutation_prop=0.1, mutation_num=1):
+        self.var_num = len(var_digit)
+        self.var_range = var_range
+        self.var_digit = var_digit
+        self.population = population
+        self.obj_fun = obj_fun
+        self.sel_por = sel_por
+        self.cross_num = cross_num
+        self.mutation_prop = mutation_prop
+        self.mutation_num = mutation_num
+        self.group = list([])
+        self.fitness = np.array([])
+        self.update()
+
+    def update(self):
+        self.ini_group()
+
+    def bool_probability(self, probability):
+        return (np.random.random() < probability)
+
+    def gen_rand_chrom(self):
+        vector = np.zeros(self.var_num)
+        for var_ind in range(self.var_num):
+            vector[var_ind] = np.random.uniform(self.var_range[var_ind,0], self.var_range[var_ind,1])
+        return chromosome(vector, self.var_range, self.var_digit)
+
+    def ini_group(self):
+        for i in range(self.population):
+            self.add(self.gen_rand_chrom())
+
+    def update_sel_prop(self):
+        sort_ind = self.fitness.argsort() + 1.0
+        self.sel_prop = sort_ind / len(sort_ind)
+
+    def add(self, chrom):
+        self.group.append(chrom)
+        self.fitness = np.append(self.fitness, self.obj_fun(chrom.vector))
+        self.update_sel_prop()
+
+    def delete(self, ind_list):
+        temp_group = self.group
+        self.group = list([])
+        self.fitness = np.array([])
+        for i in range(len(temp_group)):
+            if i not in ind_list:
+                self.add(temp_group[i])
+        self.update_sel_prop()
+
+    def select(self):
+        sel_num = int(self.population * self.sel_por * 2)
+        sel_ind = list([])
+        cur_ind = 0
+        while (len(sel_ind) < sel_num):
+            if cur_ind not in sel_ind:
+                if self.bool_probability(self.sel_prop[cur_ind]):
+                    sel_ind.append(cur_ind)
+
+            cur_ind += 1
+            if cur_ind == self.population:
+                cur_ind = 0
+        return np.array(sel_ind)
+
+    def eliminate(self):
+        cur_ind = 0
+        del_ind = list([])
+        del_num = len(self.group) - self.population
+        while (len(del_ind) < del_num):
+            if cur_ind not in del_ind:
+                if self.bool_probability(1.0 - self.sel_prop[cur_ind]):
+                    del_ind.append(cur_ind)
+
+            cur_ind += 1
+            if cur_ind == len(self.group):
+                cur_ind = 0
+        self.delete(del_ind)
+
+    def cross(self, cross_ind):
+        fa_ind, ma_ind = np.split(cross_ind, 2)
+        for i in range(len(fa_ind)):
+            fa = self.group[fa_ind[i]]
+            ma = self.group[ma_ind[i]]
+            chrom1, chrom2 = fa.crossover(fa, ma, self.cross_num)
+            chrom1.mutate(self.mutation_prop, self.mutation_num)
+            chrom2.mutate(self.mutation_prop, self.mutation_num)
+            self.add(chrom1)
+            self.add(chrom2)
+        
+    def evolve(self):
+        cross_ind = self.select()
+        self.cross(cross_ind)
+        self.eliminate()
+
 class chromosome():
 
     def __init__(self, vector, var_range, var_digit):
@@ -13,7 +107,7 @@ class chromosome():
         self.encode()
 
     def copy(self):
-        new_chrom = chromosome(self.vector, self.var_range, self.var_digit)
+        new_chrom = chromosome(np.copy(self.vector), np.copy(self.var_range), np.copy(self.var_digit))
         return new_chrom
 
     def update_gene_info(self):
@@ -69,6 +163,11 @@ class chromosome():
         new_chrom1.decode()
         new_chrom2.decode()
         return new_chrom1, new_chrom2
+
+    def mutate(self, mutation_prop, num=1):
+        for var_ind in range(self.var_num):
+            self.gene_group[var_ind].mutate(mutation_prop, num)
+        self.decode()
 
 class gene():
 
@@ -177,7 +276,6 @@ class chromosome():
         new_str1 = ''.join(new_str1)
         new_str2 = ''.join(new_str2)
         return chromosome(new_str1), chromosome(new_str2)
-'''
 
 class Genetic_Algorithm():
 
@@ -276,7 +374,6 @@ class Genetic_Algorithm():
         self.eliminate()
 
 
-'''
 class chromosome():
 
     def __init__(self, bin_str):
