@@ -17,7 +17,7 @@ var_num, var_range, var_digit
 #hmcr = np.array([0.9, 0.9, 0.9, 0.9])
 #par = np.array([0.1, 0.1, 0.1, 0.1])
 tol = 1.0e-03 
-max_iter = 5000
+max_iter = 10000
 
 def obj_fun(vector):
     x, y, m, n = vector
