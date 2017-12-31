@@ -104,6 +104,13 @@ class Genetic_Algorithm():
         if a > b:
             print('error')
 
+    def Optimized(self):
+        ind_max = self.fitness.argmax()
+        fitness_max = self.fitness[ind_max]
+        vector = self.group[ind_max].vector
+        return vector, fitness_max
+
+
 class chromosome():
 
     def __init__(self, vector, var_range, var_digit):

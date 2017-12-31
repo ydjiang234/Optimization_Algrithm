@@ -12,14 +12,12 @@ class Harmony_Search():
     #tol: Tolerance
     #max_iter: Maximum Iteration Number - an int
 
-    def __init__(self, ins_num, pit_range, hms, obj_fun, tol, max_iter, hmcr=0.9, par=0.3, fw_ratio=0.01):
-        self.ins_num = ins_num
+    def __init__(self, pit_range, hms, obj_fun, hmcr=0.9, par=0.3, fw_ratio=0.01):
+        self.ins_num = len(pit_range)
         self.pit_range = pit_range
         self.hms = hms
         self.fw_ratio = fw_ratio
         self.obj_fun = obj_fun
-        self.tol = tol
-        self.max_iter = max_iter
         self.hmcr = hmcr
         self.par = par
        
@@ -58,33 +56,27 @@ class Harmony_Search():
 
     def generate_HM(self):
         self.HM = np.zeros((self.hms, self.ins_num))
-        self.HM_f = np.zeros(self.hms)
+        self.fitness = np.zeros(self.hms)
         for i in range(self.hms):
             for ins_ind in range(self.ins_num):
                 self.HM[i, ins_ind] = np.random.uniform(self.pit_range[ins_ind,0], self.pit_range[ins_ind,1])
-            self.HM_f[i] = self.obj_fun(self.HM[i])
+            self.fitness[i] = self.obj_fun(self.HM[i])
         return 0
 
     def update_HM(self, harmony_vector):
         new_vector = harmony_vector
         new_f = self.obj_fun(new_vector)
-        ind_max = self.HM_f.argmax()
-        HM_f_max = self.HM_f[ind_max]
-        if new_f < HM_f_max:
-            self.HM_f[ind_max] = new_f
-            self.HM[ind_max] = new_vector
+        ind_min = self.fitness.argmin()
+        fitness_min = self.fitness[ind_min]
+        if new_f > fitness_min:
+            self.fitness[ind_min] = new_f
+            self.HM[ind_min] = new_vector
 
     def Optimized(self):
-        ind_min = self.HM_f.argmin()
-        HM_f_min = self.HM_f[ind_min]
-        HM_min = self.HM[ind_min]
-        return HM_min, HM_f_min
+        ind_max = self.fitness.argmax()
+        fitness_max = self.fitness[ind_max]
+        vector = self.HM[ind_max]
+        return vector, fitness_max
 
-    def Optimization(self):
-        for i in range(self.max_iter):
-            self.update_HM(self.new_harmony_vector())
-            HM_min, HM_f_min = self.Optimized()
-            print(HM_min, HM_f_min)
-            if HM_f_min <= self.tol:
-                break
-            
+    def next(self):
+        self.update_HM(self.new_harmony_vector())

@@ -12,7 +12,6 @@ var_range = np.array([
 var_digit = [1000, 1000, 1000, 1000]
 population = 100
 mutation_prop = 0.1
-var_num, var_range, var_digit
 #fw_ratio = np.array([0.01, 0.01, 0.01, 0.01])
 #hmcr = np.array([0.9, 0.9, 0.9, 0.9])
 #par = np.array([0.1, 0.1, 0.1, 0.1])
@@ -29,15 +28,12 @@ fitness = np.array([])
 vector = np.zeros((1,var_num))
 for i in range(max_iter):
     GA.evolve()
-    ind = GA.fitness.argmax()
-    fitness = np.append(fitness, GA.fitness[ind])
-    vector = np.vstack((vector, GA.group[ind].vector))
-    #print(vector[-1])
+    vector_max, fitness_max = GA.Optimized()
+    fitness = np.append(fitness, fitness_max)
+    vector = np.vstack((vector, vector_max))
     if i == 0:
         vector = vector[1:]
-    #print(GA.fitness)
-    if max(GA.fitness) > 1.0 / tol:
-        #print(vector[-1])
+    if fitness_max >= -tol:
         break
 
 ind = fitness.argmax()
