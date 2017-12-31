@@ -35,8 +35,10 @@ class Genetic_Algorithm():
             self.add(self.gen_rand_chrom())
 
     def update_sel_prop(self):
-        sort_ind = self.fitness.argsort() + 1.0
-        self.sel_prop = sort_ind / len(sort_ind)
+        sort_ind = np.argsort(self.fitness)
+        self.sel_prop = np.zeros(len(sort_ind))
+        for i in range(len(sort_ind)):
+            self.sel_prop[sort_ind[i]] = (i + 1.0) / len(sort_ind)
 
     def add(self, chrom):
         self.group.append(chrom)
@@ -50,7 +52,6 @@ class Genetic_Algorithm():
         for i in range(len(temp_group)):
             if i not in ind_list:
                 self.add(temp_group[i])
-        self.update_sel_prop()
 
     def select(self):
         sel_num = int(self.population * self.sel_por * 2)
@@ -72,7 +73,10 @@ class Genetic_Algorithm():
         del_num = len(self.group) - self.population
         while (len(del_ind) < del_num):
             if cur_ind not in del_ind:
-                if self.bool_probability(1.0 - self.sel_prop[cur_ind]):
+                if not self.bool_probability(self.sel_prop[cur_ind]):
+                    max_ind = self.fitness.argmax()
+                    #if max_ind == cur_ind:
+                        #print(self.sel_prop[cur_ind])
                     del_ind.append(cur_ind)
 
             cur_ind += 1
@@ -94,7 +98,11 @@ class Genetic_Algorithm():
     def evolve(self):
         cross_ind = self.select()
         self.cross(cross_ind)
+        a = max(self.fitness)
         self.eliminate()
+        b = max(self.fitness)
+        if a > b:
+            print('error')
 
 class chromosome():
 
