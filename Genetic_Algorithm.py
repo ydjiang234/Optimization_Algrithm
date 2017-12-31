@@ -147,21 +147,22 @@ class chromosome():
             self.vector[var_ind] = self.bin2dec(temp_gene.bin_str, var_ind)
 
     def crossover(self, chrom1, chrom2, break_num):
-        break_points = self.random_int_list(1, chrom1.var_num, break_num)
         new_chrom1 = chrom1.copy()
         new_chrom2 = chrom2.copy()
-        i = 0
-        while i < (len(break_points) - 1):
-            for j in range(break_points[i], break_points[i+1]):
-                new_chrom1.gene_group[j] = chrom2.gene_group[j]
-                new_chrom2.gene_group[j] = chrom1.gene_group[j]
-            i += 2
-        if i == (len(break_points) - 1):
-            for j in range(break_points[i], self.var_num):
-                new_chrom1.gene_group[j] = chrom2.gene_group[j]
-                new_chrom2.gene_group[j] = chrom1.gene_group[j]
-        new_chrom1.decode()
-        new_chrom2.decode()
+        if self.var_num != 1:
+            break_points = self.random_int_list(1, chrom1.var_num, break_num)
+            i = 0
+            while i < (len(break_points) - 1):
+                for j in range(break_points[i], break_points[i+1]):
+                    new_chrom1.gene_group[j] = chrom2.gene_group[j]
+                    new_chrom2.gene_group[j] = chrom1.gene_group[j]
+                i += 2
+            if i == (len(break_points) - 1):
+                for j in range(break_points[i], self.var_num):
+                    new_chrom1.gene_group[j] = chrom2.gene_group[j]
+                    new_chrom2.gene_group[j] = chrom1.gene_group[j]
+            new_chrom1.decode()
+            new_chrom2.decode()
         return new_chrom1, new_chrom2
 
     def mutate(self, mutation_prop, num=1):
